@@ -1,0 +1,12 @@
+---
+
+- name: Lookup inventory
+  tags: always
+  environment:
+    AWS_ACCESS_KEY: "{{ aws_access_key }}"
+    AWS_SECRET_KEY: "{{ aws_secret_key }}"
+    AWS_REGION: "{{ aws_region }}"
+  block:
+    - include: create-filter.yml
+    - include: lookup-inventory.yml
+    - include: add-inventory.yml

@@ -1,0 +1,17 @@
+- name: Cleanup action
+  set_fact:
+    to_state: "{{ to_state | default('up') | trim | lower }}"
+
+- name: Validate action
+  assert:
+    that:
+      - "to_state == 'up' or to_state == 'down'"
+    fail_msg: "to_state must be up or down"
+          
+- set_fact:
+    state: present
+  when: to_state == 'up'
+
+- set_fact:
+    state: absent
+  when: to_state == 'down'

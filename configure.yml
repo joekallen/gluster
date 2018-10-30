@@ -1,0 +1,8 @@
+- hosts: gluster:!provision
+  # gather_facts: no
+  remote_user: core
+  pre_tasks:          
+    - include_tasks: tasks/parse_to_state.yml
+  tasks:
+    - import_role:
+        name: gluster_config   

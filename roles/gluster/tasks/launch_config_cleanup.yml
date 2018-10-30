@@ -1,0 +1,37 @@
+---
+
+- name: Get search regex
+  set_fact:
+    name_regex: "{{ deployment_name }}.*"
+
+- name: Read launch configs
+  ec2_lc_find:
+    region: "{{ aws_env.AWS_REGION }}"
+    name_regex: "{{ name_regex }}"
+  register: launch_configs    
+
+- name: Get ids of present launch configurations
+  set_fact:
+    launch_config_ids: "{{ launch_configs | json_query('results[*].name') }}"
+
+- name: Read autoscaling groups
+  ec2_asg_facts:
+    name: "{{ name_regex }}"
+  register: autoscaling_groups
+
+- name: Get ids of used launched configurations
+  set_fact:
+    used_launch_config_ids: "{{ autoscaling_groups | json_query('results[*].launch_configuration_name') }}"  
+
+- name: Get launch config ids to delete
+  set_fact:
+    launch_configs_to_delete: "{{ launch_config_ids | difference(used_launch_config_ids) }}"
+
+- name: Remove unused launch configurations
+  ec2_lc:
+    name: "{{ launch_config_name_to_delete }}"
+    state: absent
+  loop: "{{ launch_configs_to_delete }}"  
+  loop_control:
+    loop_var: launch_config_name_to_delete
+  

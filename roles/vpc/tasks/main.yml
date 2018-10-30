@@ -1,0 +1,39 @@
+---
+- name: Get VPC facts
+  ec2_vpc_net_facts:
+    filters:
+      "tag:Name": "{{ vpc }}"
+  register: vpc_facts
+
+- name: Set VPC Id
+  set_fact:
+    vpc_id: "{{ vpc_facts.vpcs[0].id }}"
+
+- name: Get VPC subnet facts
+  ec2_vpc_subnet_facts:
+    # region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc_id }}"
+  register: vpc_subnet_facts
+
+- name: Set VPC subnet IDs"
+  set_fact:
+    vpc_subnets: "{{ vpc_subnets | default({}) | combine({ (subnet_item.tags.Name | default('default')): subnet_item }) }}"
+  loop: "{{ vpc_subnet_facts.subnets }}"
+  loop_control: 
+    loop_var: subnet_item 
+
+- name: Get VPC security group facts
+  ec2_group_facts:
+    # region: "{{ region }}"
+    filters:
+      vpc-id: "{{ vpc_id }}"
+  register: vpc_security_group_facts
+
+- name: Set VPC security groups
+  set_fact:
+    vpc_security_groups: "{{ vpc_security_groups | default({}) | combine({ (group.group_name | default('default')): group }) }}"
+  loop: "{{ vpc_security_group_facts.security_groups }}"
+  loop_control: 
+    loop_var: group
+    

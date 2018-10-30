@@ -1,0 +1,15 @@
+---
+
+- name: Deploy/Update node
+  include: cluster_up.yml
+  environment: "{{ aws_env }}"
+  when: state == 'present'
+
+- name: Tear down node
+  include: cluster_down.yml
+  environment: "{{ aws_env }}"
+  when: state == 'absent'
+    
+- name: Cleanup unused launch configurations
+  import_tasks: launch_config_cleanup.yml
+  environment: "{{ aws_env }}"

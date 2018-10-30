@@ -1,0 +1,60 @@
+#cloud-config
+
+coreos:
+  update:
+    reboot-strategy: "off"
+  units:
+    - name: systemd-journal-gatewayd.socket
+      command: start
+      enable: yes
+
+    # journal is available on port 19531
+    - name: systemd-journal-gatewayd.service
+      command: start
+      enable: yes
+
+    # setup shared volumes on startup
+    - name: brick-setup.service
+      command: start 
+      content: |
+        [Unit]
+        Description=create shared volumes
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/sh -c ' \
+          mkdir -p /etc/glusterfs \
+          mkdir -p /var/lib/glusterd \
+          mkdir -p /var/log/glusterfs'
+
+    - name: gluster.service
+      command: start
+      runtime: true
+      content: |
+        [Unit]
+        After=brick-setup.service
+        Requires=brick-setup.service
+        Description=gluster server
+        [Service]
+        Restart=on-failure
+        RestartSec=30
+        TimeoutStopSec=90
+        RestartPreventExitStatus=5
+        ExecStartPre=/usr/bin/docker pull gluster/gluster-centos:{{ gluster_version }} 
+        ExecStartPre=-/usr/bin/docker rm -f {{ inventory_name }}-container
+        ExecStart=/usr/bin/sh -c 'HOSTNAME=`hostname`;/usr/bin/docker run \
+          --name {{ inventory_name }}-container \
+          -h hostname \
+          --privileged=true \
+          -p 111:111/tcp \
+          -p 111:111/udp \
+          -p 24007-24009:24007-24009 \
+          -p 49152-49156:49152-49156 \
+          -v /data \
+          -v /etc/glusterfs:/etc/glusterfs:z \
+          -v /var/lib/glusterd:/var/lib/glusterd:z \
+          -v /var/log/glusterfs:/var/log/glusterfs:z \
+          -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+          gluster/gluster-centos:{{ gluster_version }}'
+        ExecStop=/usr/bin/docker rm -f gluster
+        

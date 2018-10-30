@@ -1,0 +1,23 @@
+---
+
+- name: Set autoscaling group name
+  set_fact:
+    asg_name: "{{ deployment_name }}"
+
+- name: Autoscaling group
+  ec2_asg:
+    name: "{{ asg_name }}"
+    state: "{{ state }}"
+    launch_config_name: "{{ launch_config_name | default() }}"
+    vpc_zone_identifier: ["{{ subnet_id }}"]
+    availability_zones: ["{{ availability_zone }}"]
+    health_check_period: "{{ health_check_period | default(60) }}"
+    health_check_type: ELB
+    min_size: 1
+    max_size: 1
+    lc_check: yes
+    desired_capacity: 1
+    replace_batch_size: 1
+    replace_all_instances: yes
+    tags: "{{ deployment_tags }}"
+  register: asg

@@ -1,0 +1,34 @@
+---
+
+- name: Load app cloud config
+  set_fact:
+    app_cloud_config: "{{ lookup('template', '../../templates/{{ cloud_config_template }}.j2') }}"
+
+- name: Build launch config hash
+  vars:
+    config:
+      image_id: "{{ ami_id }}"
+      key_name: "{{ ssh_key }}"
+      security_groups: "{{ security_groups }}"
+      instance_type: "{{ instance_type }}"
+      assign_public_ip: "{{ public_ip }}"
+      user_data: "{{ app_cloud_config }}"
+      volumes: "{{ volumes }}"
+  set_fact:
+    launch_config_hash: "{{ config | to_yaml | hash('md5') }}"    
+
+- name: Get launch config name
+  set_fact:
+    launch_config_name: "{{ deployment_name }}-{{ launch_config_hash }}"
+
+- name: Launch configuration
+  ec2_lc:
+    name: "{{ launch_config_name }}"
+    state: "{{ state }}"
+    image_id: "{{ ami_id }}"
+    key_name: "{{ ssh_key }}"
+    security_groups: "{{ security_groups }}"
+    instance_type: "{{ instance_type }}"
+    assign_public_ip: "{{ public_ip }}"
+    user_data: "{{ app_cloud_config }}"
+    volumes: "{{ volumes }}"

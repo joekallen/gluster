@@ -1,0 +1,32 @@
+---
+
+inventory_name: gluster
+# route53 variables
+hosted_zone: jallen.com
+# TODO: this should be read from aws
+hosted_zone_id: Z2FVZDM44KQ110
+
+#provision variables
+gluster_version: gluster4u0_centos7
+ami_id: ami-f4d4b694
+public_ip: yes
+instance_type: t2.micro
+security_groups:
+  - vpc
+  - allow-public-ssh
+
+root_device_size:
+root_device: /dev/xda
+
+volumes:
+  - device_name: /dev/sdf
+    volume_size: 30
+    volume_type: gp2
+    delete_on_termination: false
+    encrypted: no
+  # this is root device in coreos  
+  - device_name: /dev/xvda
+    volume_size: 30
+    volume_type: gp2
+    delete_on_termination: false
+cloud_config_template: gluster_cloud_config    

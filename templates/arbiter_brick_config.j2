@@ -1,0 +1,4 @@
+replica {{ replicas }} arbiter {{ arbiters }} transport tcp
+{% for server in servers %}
+{{server}}:{{brick_name}}
+{% endfor %}

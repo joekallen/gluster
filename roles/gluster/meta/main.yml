@@ -1,0 +1,5 @@
+---
+
+dependencies:
+  - role: aws_env
+  - { role: vpc, environment: "{{ aws_env }}" }

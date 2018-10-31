@@ -1,5 +1,0 @@
-brick_dir: /data/bricks
-replicas: 3
-arbiters: 1
-brick_type: arbiter_brick_config
-brick_name: sample

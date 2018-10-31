@@ -1,0 +1,12 @@
+.vault_pass
+coreos.yml
+*.retry
+
+env
+load-inventory
+
+#keep from commiting wip
+route53.yml
+
+*.orig
+.vscode

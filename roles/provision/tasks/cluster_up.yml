@@ -1,0 +1,4 @@
+---
+
+- import_tasks: launch_config.yml
+- import_tasks: autoscaling_group.yml

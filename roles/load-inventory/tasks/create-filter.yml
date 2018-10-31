@@ -1,8 +1,0 @@
----
-
-- name: Get instance lookup filter
-  vars:
-    tag: "{'tag:{{ item.key }}':'{{ item.value }}'}"
-  register:
-    filter_tags: "{{ filter_tags | default({}) | combine(tag) }}"
-  with_dict: "{{ instance_tags }}"

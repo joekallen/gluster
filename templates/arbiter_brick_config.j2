@@ -1,4 +1,1 @@
-replica {{ replicas }} arbiter {{ arbiters }} transport tcp
-{% for server in servers %}
-{{server}}:{{brick_name}}
-{% endfor %}
+replica {{ nodes| length }} arbiter {{ arbiters }} transport tcp{% for server in nodes %} {{ server }}:{{ brick_dir }}/{{ brick_name }}{% endfor %}

@@ -1,0 +1,27 @@
+---
+
+- name: Get ec2 instance id
+  set_fact:
+    instance_id: "{{ asg.instances | first }}"  
+
+- name: Get ec2 facts
+  ec2_instance_facts:
+    instance_ids:
+      - "{{ instance_id }}"
+  register: ec2    
+
+- name: Get ip addresses for ec2 instance
+  set_fact:
+    private_ip_address: "{{ ec2 | json_query('instances[*].private_ip_address') | first }}"
+    public_ip_address: "{{ ec2 | json_query('instances[*].public_ip_address') | first }}"
+
+- name: Update inventory with ip for ssh
+  add_host:
+    name: "{{ private_dns_name }}"
+    groups: 
+      - "{{ subnet }}"
+      - nodes
+    public_route: "{{ public_ip_address }}"
+    # ansible_docker_host: gluster-container
+    # ansible_connection: docker
+  when: state == 'present'      

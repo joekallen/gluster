@@ -3,8 +3,8 @@
 vpc: dev
 ssh_key: dev
 
-ssh_public_key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvgykMQ6V5ILatzAbxUr8/fENzarUq6CcAMS9B+xAU0weCJGUFAu5ZSnMIQJUfS5Gxa8GG4GK5cdh8oPbyDPaL7vfQXt+PJHObG/MlTHmJ9LnOm64ZlXvbnAYAgoxun/Flb2OPlrSZbcC/R9WFICTOuGcQME6hjLRSvWIdK5obIOJ/CsuFn//IXtkvDpXrk2P7M5KaLNqSIXX+nYhH93nwqRnfoaXKifhLdHl74yt1O6qjzCJFqQVi5mLtb5cse9mW9RpfSW6iJCELO/1ldqdkJv3zXlR8K4ccQNAoKVxl32j9onZ/xuVhQIxi1vsGqimCyBFsNEU6TAytT9jw4qEX joe.allen@USSCOJAL9-ML.local'
-
+inventory_name: gluster
+aws_region: us-west-2
 aws_access_key: !vault |
           $ANSIBLE_VAULT;1.2;AES256;dev
           35636432383833306335303733383166623761373737373262336635393631363964386235633835

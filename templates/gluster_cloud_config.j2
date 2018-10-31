@@ -4,6 +4,19 @@ coreos:
   update:
     reboot-strategy: "off"
   units:
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+        [Socket]
+        ListenStream=2375
+        Service=docker.service
+        BindIPv6Only=both
+        [Install]
+        WantedBy=sockets.target
+        
     - name: systemd-journal-gatewayd.socket
       command: start
       enable: yes
@@ -46,10 +59,8 @@ coreos:
           --name {{ inventory_name }}-container \
           -h hostname \
           --privileged=true \
-          -p 111:111/tcp \
-          -p 111:111/udp \
-          -p 24007-24009:24007-24009 \
-          -p 49152-49156:49152-49156 \
+          -p 24007-24008:24007-24008 \
+          -p 49152:49152 \
           -v /data \
           -v /etc/glusterfs:/etc/glusterfs:z \
           -v /var/lib/glusterd:/var/lib/glusterd:z \

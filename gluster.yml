@@ -1,5 +1,39 @@
----
+# provision our gluster nodes
+- hosts: gluster:&provision
+  pre_tasks:
+    - include_tasks: tasks/parse_to_state.yml
+  tasks:
+    - debug:
+        msg: "data: {{ hostvars[inventory_hostname].subnet }}"
+    - import_role: 
+        name: provision    
 
-- import_playbook: provision.yml
-- import_playbook: coreos.yml
-# - import_playbook: configure.yml
+- hosts: load_inventory
+  gather_facts: no
+  pre_tasks:          
+    - include_tasks: tasks/parse_to_state.yml
+  roles:
+    - aws_env
+  tasks:  
+    - include_role: 
+        name: load_inventory  
+      when: state == 'present' 
+  
+- hosts: gluster:&config
+  gather_facts: no
+  connection: docker
+  become: yes
+  pre_tasks:          
+    - include_tasks: tasks/parse_to_state.yml
+  tasks:
+    - include_role:
+        name: configure
+      vars:
+        ansible_docker_extra_args: "-H tcp://{{ hostvars[hostname].public_route }}:2375"  
+      delegate_to: "{{ hostname }}"    
+      loop: "{{ groups.nodes }}"
+      loop_control:
+        loop_var: hostname
+      # TODO: change to wait for container to become available
+      delay: 30  
+      when: state == 'present'  

@@ -1,0 +1,57 @@
+---
+- name: Get volume error message
+  set_fact:
+    volumeMessage: "Volume Name: {{ brick_name }}" 
+    nodes: "{{ groups.nodes }}"
+    last_node: "{{ groups.nodes | last }}"
+
+- name: Ensure Gluster brick and mount directories exist.
+  file:
+    path: "{{ dirname }}"
+    state: directory
+    owner: root
+    mode: 0775
+  with_items:
+    - "{{ brick_dir }}"
+    - "{{ brick }}"  
+  loop_control:
+    loop_var: dirname  
+
+# Gluster volume configuration.
+- name: Check if Gluster volumes already exist.
+  shell: "gluster volume info"
+  changed_when: false
+  register: gluster_volume_info
+
+- name: Connect to Gluster peers.
+  shell: "gluster peer probe {{ peer }}"
+  register: gluster_peer_probe
+  changed_when: "'already in peer list' not in gluster_peer_probe.stdout"
+  failed_when: false
+  with_items: "{{ nodes }}"
+  loop_control:
+    loop_var: peer
+  when: "volumeMessage not in gluster_volume_info.stdout"
+
+# Volume setup happens on the last node, this allows the hostname for the first node to be updated in the pool  
+- name: Create Gluster volume.
+  shell: "gluster volume create {{ brick_name }} {{ lookup('template', '../../templates/{{ brick_type }}.j2') }}"
+  register: gluster_volume_create
+  changed_when: "'successful' in gluster_volume_create.stdout"
+  when: "hostname == last_node and volumeMessage not in gluster_volume_info.stdout"
+
+- name: Ensure Gluster volume is started.
+  shell: "gluster volume start {{ brick_name }}"
+  register: gluster_volume_start
+  changed_when: "'successful' in gluster_volume_start.stdout"
+  when: "hostname == last_node and volumeMessage not in gluster_volume_info.stdout"
+
+# Mount configuration.
+- name: Ensure the Gluster volume is mounted.
+  mount:
+    name: "{{ mount_dir }}"
+    src: "{{ hostname }}:{{ brick }}"
+    fstype: glusterfs
+    opts: "defaults,_netdev"
+    state: mounted
+  when: "hostname == last_node"  

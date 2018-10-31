@@ -1,0 +1,6 @@
+# this is to proxy ssh into the container for configuration
+brick_dir: /data/bricks
+arbiters: 1
+brick_type: arbiter_brick_config
+brick_name: sample
+ansible_python_interpreter: /usr/bin/python

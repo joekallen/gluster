@@ -1,9 +1,0 @@
-# provision our gluster nodes
-- hosts: gluster:&provision
-  pre_tasks:
-    - include_tasks: tasks/parse_to_state.yml
-  tasks:
-    - import_role: 
-        name: gluster  
-
-          

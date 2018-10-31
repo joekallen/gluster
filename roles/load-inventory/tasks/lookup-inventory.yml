@@ -1,6 +1,0 @@
----
-
-- name: ec2 instance lookup
-  ec2_instance_facts: 
-    filters: "{{ filter_tags | combine({ 'instance-state-name': 'running' }) }}"
-  register: ec2

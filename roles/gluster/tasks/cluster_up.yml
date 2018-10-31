@@ -1,6 +1,0 @@
----
-
-- import_tasks: launch_config.yml
-- import_tasks: autoscaling_group.yml
-- import_tasks: get_ip_addresses.yml
-- import_tasks: route53.yml

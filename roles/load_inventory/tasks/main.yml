@@ -1,0 +1,33 @@
+---
+
+- name: Get ec2 info
+  environment: "{{ aws_env }}"
+  ec2_instance_facts:
+    region: "{{ aws_region }}"
+    filters:
+      'tag:Environment': "{{ vpc }}"
+      'tag:Cluster': "{{ inventory_name }}"
+      'instance-state-name': running
+  register: ec2
+
+- name: Wait for docker api to be available
+  uri:
+    url: "http://{{ instance.public_ip_address }}:2375/containers/gluster-container/json"
+    status_code: 200
+  register: result   
+  until: result.status == 200
+  retries: 120
+  delay: 1
+  loop: "{{ ec2.instances }}"
+  loop_control:
+    loop_var: instance  
+        
+- name: Add ip info to hosts
+  add_host:
+    name: "{{ instance.private_dns_name }}"
+    groups:
+      - nodes
+    public_route: "{{ instance.public_ip_address }}"
+  loop: "{{ ec2.instances }}"
+  loop_control:
+    loop_var: instance 

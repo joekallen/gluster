@@ -1,50 +1,45 @@
 ; nodes are defined by az, so it is easy to identify candidates for
 ; replica groups, we don't want each server in the same az
-ga-1
-gb-1
-gc-1
+g1.a
+g1.b
+g1.c
 gluster-container ansible_connection=docker
+load_inventory
 
 ; inventory config by subnet
 [public-a]
-g1-a
+g1.a
 
 [public-b]
-g1-b
+g1.b
 
 [public-c]
-g1-c
+g1.c
 
-; config for provisioning nodes
+; grouping for provisioning nodes
 ; this is here to easily add all provisioning to 1 group
-[gluster_provision]
-g1-a
-g1-b
-g1-c
+[provision]
+g1.a
+g1.b
+g1.c
 
-; nodes in aws
-[gluster_nodes]
+[config]
+gluster-container
 
-[coreos:children]
-gluster_nodes
+[nodes]
 
-[gluster_config:children]
-gluster_nodes
+[local]
+load_inventory
 
+[local:children]
+provision
+config
 
 ; group for config/live nodes, allows getting all shared gluster config in 1 file
 [gluster:children]
-gluster_provision
-gluster_nodes
-
-; grouping for aws region
-[us-west-2:children]
-public-a
-public-b
-public-c
-
-[provision:children]
-gluster_provision
+config
+nodes
+provision
 
 ; subnet vars
 [public-a:vars]
@@ -55,6 +50,3 @@ subnet=public-b
 
 [public-c:vars]
 subnet=public-c
-
-[us-west-2:vars]
-aws_region=us-west-2
